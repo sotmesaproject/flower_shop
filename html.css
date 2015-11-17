@@ -1,0 +1,2028 @@
+ = Menu
+nixCraft
+Linux and Unix tutorials for new and seasoned sysadmin.
+HowTo: Add Jobs To cron Under Linux or UNIX?
+by Vivek Gite on April 16, 2006 last updated May 19, 2015
+in Commands, Linux, UNIX
+
+How do I add cron job under Linux or UNIX like operating system?
+
+Cron allows Linux and Unix users to run commands or scripts at a given date and time. You can schedule scripts to be executed periodically. Cron is one of the most useful tool in a Linux or UNIX like operating systems. It is usually used for sysadmin jobs such as backups or cleaning /tmp/ directories and more. The cron service (daemon) runs in the background and constantly checks the /etc/crontab file, and /etc/cron.*/ directories. It also checks the /var/spool/cron/ directory.
+
+crontab command
+
+You need to use the crontab command to edit/create, install, deinstall or list the cron jobs in Vixie Cron. Each user can have their own crontab file, and though these are files in /var/spool/cron/crontabs, they are not intended to be edited directly. You need to use crontab command for editing or setting up your own cron jobs.
+Types of cron configuration files
+
+There are different types of configuration files:
+
+    The UNIX / Linux system crontab : Usually, used by system services and critical jobs that requires root like privileges. The sixth field (see below for field description) is the name of a user for the command to run as. This gives the system crontab the ability to run commands as any user.
+    The user crontabs: User can install their own cron jobs using the crontab command. The sixth field is the command to run, and all commands run as the user who created the crontab
+
+Note: This faq features cron implementations written by Paul Vixie and included in many Linux distributions and Unix like systems such as in the popular 4th BSD edition. The syntax is compatible with various implementations of crond.
+How Do I install or create or edit my own cron jobs?
+
+To edit or create your own crontab file, type the following command at the UNIX / Linux shell prompt:
+$ crontab -e
+Do I have to restart cron after changing the crontable file?
+
+No. Cron will examine the modification time on all crontabs and reload those which have changed. Thus cron need not be restarted whenever a crontab file is modified.
+Syntax of crontab (field description)
+
+The syntax is:
+
+ 
+1 2 3 4 5 /path/to/command arg1 arg2
+ 
+
+OR
+
+ 
+1 2 3 4 5 /root/backup.sh
+ 
+
+Where,
+
+    1: Minute (0-59)
+    2: Hours (0-23)
+    3: Day (0-31)
+    4: Month (0-12 [12 == December])
+    5: Day of the week(0-7 [7 or 0 == sunday])
+    /path/to/command - Script or command name to schedule
+
+Easy to remember format:
+
+* * * * * command to be executed
+- - - - -
+| | | | |
+| | | | ----- Day of week (0 - 7) (Sunday=0 or 7)
+| | | ------- Month (1 - 12)
+| | --------- Day of month (1 - 31)
+| ----------- Hour (0 - 23)
+------------- Minute (0 - 59)
+
+Your cron job looks as follows for system jobs:
+
+1 2 3 4 5 USERNAME /path/to/command arg1 arg2
+
+OR
+
+1 2 3 4 5 USERNAME /path/to/script.sh
+
+Example: Run backup cron job script
+
+If you wished to have a script named /root/backup.sh run every day at 3am, your crontab entry would look like as follows. First, install your cronjob by running the following command:
+# crontab -e
+
+Append the following entry:
+0 3 * * * /root/backup.sh
+
+Save and close the file.
+More examples
+
+To run /path/to/command five minutes after midnight, every day, enter:
+5 0 * * * /path/to/command
+
+Run /path/to/script.sh at 2:15pm on the first of every month, enter:
+15 14 1 * * /path/to/script.sh
+
+Run /scripts/phpscript.php at 10 pm on weekdays, enter:
+0 22 * * 1-5 /scripts/phpscript.php
+
+Run /root/scripts/perl/perlscript.pl at 23 minutes after midnight, 2am, 4am ..., everyday, enter:
+23 0-23/2 * * * /root/scripts/perl/perlscript.pl
+
+Run /path/to/unixcommand at 5 after 4 every Sunday, enter:
+5 4 * * sun /path/to/unixcommand
+How do I use operators?
+
+An operator allows you to specifying multiple values in a field. There are three operators:
+
+    The asterisk (*) : This operator specifies all possible values for a field. For example, an asterisk in the hour time field would be equivalent to every hour or an asterisk in the month field would be equivalent to every month.
+    The comma (,) : This operator specifies a list of values, for example: "1,5,10,15,20, 25".
+    The dash (-) : This operator specifies a range of values, for example: "5-15" days , which is equivalent to typing "5,6,7,8,9,....,13,14,15" using the comma operator.
+    The separator (/) : This operator specifies a step value, for example: "0-23/" can be used in the hours field to specify command execution every other hour. Steps are also permitted after an asterisk, so if you want to say every two hours, just use */2.
+
+How do I disable email output?
+
+By default the output of a command or a script (if any produced), will be email to your local email account. To stop receiving email output from crontab you need to append >/dev/null 2>&1. For example:
+0 3 * * * /root/backup.sh >/dev/null 2>&1
+
+To mail output to particular email account let us say vivek@nixcraft.in you need to define MAILTO variable as follows:
+MAILTO="vivek@nixcraft.in"
+0 3 * * * /root/backup.sh >/dev/null 2>&1
+
+See "Disable The Mail Alert By Crontab Command" for more information.
+Task: List all your cron jobs
+
+Type the following command:
+# crontab -l
+# crontab -u username -l
+
+To remove or erase all crontab jobs use the following command:
+# Delete the current cron jobs #
+crontab -r
+
+## Delete job for specific user. Must be run as root user ##
+crontab -r -u username
+Use special string to save time
+
+Instead of the first five fields, you can use any one of eight special strings. It will not just save your time but it will improve readability.
+Special string	Meaning
+@reboot	Run once, at startup.
+@yearly	Run once a year, "0 0 1 1 *".
+@annually	(same as @yearly)
+@monthly	Run once a month, "0 0 1 * *".
+@weekly	Run once a week, "0 0 * * 0".
+@daily	Run once a day, "0 0 * * *".
+@midnight	(same as @daily)
+@hourly	Run once an hour, "0 * * * *".
+Examples
+
+Run ntpdate command every hour:
+@hourly /path/to/ntpdate
+
+Make a backup everyday:
+@daily /path/to/backup/script.sh
+More about /etc/crontab file and /etc/cron.d/* directories
+
+/etc/crontab is system crontabs file. Usually only used by root user or daemons to configure system wide jobs. All individual user must must use crontab command to install and edit their jobs as described above. /var/spool/cron/ or /var/cron/tabs/ is directory for personal user crontab files. It must be backup with users home directory.
+Understanding Default /etc/crontab
+
+Typical /etc/crontab file entries:
+
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+# run-parts
+01 * * * * root run-parts /etc/cron.hourly
+02 4 * * * root run-parts /etc/cron.daily
+22 4 * * 0 root run-parts /etc/cron.weekly
+42 4 1 * * root run-parts /etc/cron.monthly
+
+First, the environment must be defined. If the shell line is omitted, cron will use the default, which is sh. If the PATH variable is omitted, no default will be used and file locations will need to be absolute. If HOME is omitted, cron will use the invoking users home directory.
+
+Additionally, cron reads the files in /etc/cron.d/ directory. Usually system daemon such as sa-update or sysstat places their cronjob here. As a root user or superuser you can use following directories to configure cron jobs. You can directly drop your scripts here. The run-parts command run scripts or programs in a directory via /etc/crontab file:
+Directory	Description
+/etc/cron.d/	Put all scripts here and call them from /etc/crontab file.
+/etc/cron.daily/	Run all scripts once a day
+/etc/cron.hourly/	Run all scripts once an hour
+/etc/cron.monthly/	Run all scripts once a month
+/etc/cron.weekly/	Run all scripts once a week
+How do I use above directories to put my own scripts or jobs?
+
+Here is a sample shell script called clean.cache. This script is created to clean up cached files every 10 days. This script is directly created at /etc/cron.daliy/ directory. In other words create a text file called /etc/cron.daily/clean.cache as follows.
+
+ #!/bin/bash
+# A sample shell script to clean cached file from lighttpd web server
+CROOT="/tmp/cachelighttpd/"
+ 
+# Clean files every $DAYS
+DAYS=10
+ 
+# Web server username and group name
+LUSER="lighttpd"
+LGROUP="lighttpd"
+ 
+# Okay, let us start cleaning as per $DAYS
+/usr/bin/find ${CROOT} -type f -mtime +${DAYS} | xargs -r /bin/rm
+ 
+# Failsafe 
+# if directory deleted by some other script just get it back 
+if [ ! -d $CROOT ]
+then
+        /bin/mkdir -p $CROOT
+        /bin/chown ${LUSER}:${LGROUP} ${CROOT}
+fi
+
+Save and close the file. Set the permissions:
+# chmod +x /etc/cron.daily/clean.cache
+How do I backup installed cron jobs entries?
+
+Simply type the following command to backup your cronjobs to a nas server mounted at /nas01/backup/cron/users.root.bakup directory:
+# crontab -l > /nas01/backup/cron/users.root.bakup
+# crontab -u userName -l > /nas01/backup/cron/users.userName.bakup
+See also
+
+    See man pages for more information cron(8), crontab(1), crontab(5), run-parts(8)
+
+TwitterFacebookGoogle+Download PDF version Found an error/typo on this page?
+
+This entry is 2 of 14 in the Linux Cron Jobs Howto & Tutorial series. Keep reading the rest of the series:
+
+    What is cron on a Linux or Unix-like systems?
+    HowTo: Add Jobs To cron Under Linux or UNIX?
+    Linux Verify crond Daemon And Cronjobs Are Running
+    Linux Start Restart and Stop The Cron or Crond Service
+    Linux: List / Display All Cron Jobs
+    Linux / UNIX Crontab File Location
+    Linux / UNIX: Change Crontab Email Settings ( MAILTO )
+    Disable The Mail Alert By Crontab Command On a Linux or Unix-like Systems
+    Linux: At What Time Cron Entries In cron.daily, cron.weekly, cron.monthly Run?
+    Linux Execute Cron Job After System Reboot
+    Linux / UNIX Setup and Run PHP Script As A Cron Job
+    How to run crontab job every minute on a Linux or Unix-like system
+    Run crontab (cron jobs) Every 10 Minutes
+    Cron Job Script Execution on the Last Day of a Month
+
+{ 218 comments… add one }
+
+    umesh August 30, 2006, 6:10 am
+
+    hi
+    i want to mail for few members for every 15 mintes .i have worte php script stored as mail.php i want to set cronjob . i don’t no how to set corn commad or path i am useing cpanel
+    can u help me
+    Reply Link
+    nixCraft August 30, 2006, 6:41 pm
+
+    Type crontab -e command:
+    crontab -e
+
+    Append following job:
+    15 * * * * /path/to/script.php
+
+    Save and close the file.
+    Reply Link
+        Techie Talks July 9, 2010, 3:02 am
+
+        Above is easiest way of creating one.
+        Reply Link
+        reggy February 11, 2011, 3:56 pm
+
+        hi nixcraft
+        you mean “Save and close the file.”
+
+        and how to execution this file??
+
+        sorry i’am newbie :D
+        Reply Link
+            arora February 22, 2011, 10:39 am
+
+            saving the above file will help as it will excecute on first 15th min of every hour.
+            Reply Link
+                Jimmy August 25, 2011, 10:28 am
+
+                Old thread, but found this by misstake :)
+
+                Think you need to put:
+                0,15,30,45 * * * * /path/to/script.php
+
+                if you want it to execute every 15 minutes.
+                Reply Link
+                    anshumantrivedi October 5, 2011, 6:44 am
+
+                    0,15,30,45,60 * * * * /path/to/script.php
+
+                    you can try this……….
+                    Reply Link
+                    chiks November 8, 2011, 3:49 pm
+
+                    urs is right…………but if u r a unix professional then u should follow mine
+
+                    and (this is d best way to schedule in every 15 min)
+
+                    */15 * * * * /path/to/script.php
+                    Reply Link
+                        dilip varma December 18, 2013, 3:44 pm
+
+                        for the best practise use
+
+                        */15 * * * /path/to/php_script
+                        Reply Link
+                        jyoti April 27, 2015, 9:50 pm
+
+                        it is best and correct way
+                        Reply Link
+        srini August 25, 2014, 8:31 am
+
+        I believe i should be like,
+        15,30,45,00 * * * * /path/to/script.php
+        Reply Link
+            Catweazle February 5, 2015, 12:35 pm
+
+            No like they said above it should be */15 * * * * /path/to/php_script the 15,30,45,00 makes a mess of your crontab.
+            Reply Link
+    David W. Jensen December 27, 2006, 2:45 am
+
+    Using Puppy Linux at the moment. How does one check to see if the cron daemon is running.?
+    I have a file that works from the command line.
+    “/home/dwj/CRONY/cronf.01” which simply makes a statement on the monitor screen. I want cron to be able to put a variety of messages on the monitor screen at various times through the day & week. [ A separate file for each message of course.]
+    But so far nothing I had tried works. In /var/spool/cron/crontabs/dwj [ my crontab file which was created using Puppy’s GUI ‘gcrontab’ within their control panel, bottom selection.].
+    The items in the fields look correct to me vis:
+    “01-59/6 * * * * /home/dwj/CRON/cronf.01”
+
+    Which is supposed to mean from minute 01-59 each
+    6 second interval = do the file in field #-6.
+    What else am I missing or do not understand.?
+
+    TIA for any & all help rendered.
+
+    Dwj 73 w 0 r m v LONG LIVE LINUX
+    Reply Link
+        chiks November 8, 2011, 4:01 pm
+
+        david u know cron job wakes up each and every minute….so u can’t
+        write a cron script which is supposed to run each and every second.
+        for that u have to write a script and another one u can schedule a particular job
+        like 7:30:45.
+        for dis u have to write a script at 7:30 first.give this script name to a.sh.then….
+        in unix there s a concept called wrapper script in which u will include the “sleep”
+        command
+        write another script called b.sh
+        in there write
+        sleep 44 a.sh
+        then execute it. it will run at 7:30:45
+        Reply Link
+    nixCraft December 27, 2006, 8:46 am
+
+    David,
+
+    Crontab is designed to work with minutes and upwards it cannot wake up and run task every second or every 6 second later. cron is not really
+    designed for such frequent runs.
+
+    You need to start your script in background
+    /home/dwj/CRON/cronf.01 &
+
+    in script put logic as follows
+    while [ true ]; do
+    sleep 6
+    # add rest of commands
+    Done
+    Reply Link
+    JDS January 5, 2007, 4:00 pm
+
+    The response to “how to run every 15 minutes” is wrong. The answer given:
+
+    15 * * * * /path/to/script.sh
+
+    will run the thing every hour, at the 15 minute mark. (9:15, 10:15, etc)
+
+    The proper answer is:
+
+    0,15,30 * * * * script.sh
+
+    or
+
+    0-59/15 * * * * script.sh
+
+    (depends on your version of cron)
+    Reply Link
+        Manoj October 5, 2010, 5:10 am
+
+        we can run cron job every 15 min using following expression.
+        */15 * * * * script.sh
+        Reply Link
+            Chitra July 24, 2013, 9:52 am
+
+            Thanks for this post.
+            Reply Link
+        Ian Mc March 10, 2011, 11:42 am
+
+        Surely 0,15,30,45 * * * * script.sh
+
+        ???
+        Reply Link
+    zane matthew January 26, 2007, 4:00 pm
+
+    thanks for the help, im at working installing mrtg and setting up my crontab files for the first time
+    Reply Link
+    ashish February 20, 2007, 7:09 pm
+
+    why doesn’t crontab work for me .
+    the crond is running bbut what i want is not happening
+    /var/spool/cron is unreadable
+    also crontab -l correctly lists what I want
+    35 * * * * /usr/bin/gedit
+    Reply Link
+        rahul January 30, 2013, 8:22 am
+
+        here u want to write */35 * * * * /usr/bin/gedit
+        Reply Link
+    ashish February 20, 2007, 7:13 pm
+
+    even at does nothing for me
+    atd is running
+    Reply Link
+    ashish February 20, 2007, 7:14 pm
+
+    even at does nothing for me
+    atd is running
+    and when I press atq it lists the time and everything
+    but when the time comes the atq displays nothing
+    Reply Link
+    vengadesh March 14, 2007, 9:06 am
+
+    I have a question , How to run Cron for 5 seconds.please advice me .Reply fast
+    Reply Link
+    rocky March 16, 2007, 8:36 am
+
+    vengadesh,
+
+    You can’t uss crond for seconds
+    Reply Link
+    Tarachand March 20, 2007, 5:04 am
+
+    hi
+
+    I want to fire cron job at the interval of every 10 minutes, how to write entry in crontab.
+
+    regards
+
+    Tarachand
+    Reply Link
+    George March 22, 2007, 1:35 pm
+
+    Is it possible to have cron run something on the second Saturday of the month? Also, is it possible to have cron run somthing 2 days prior to the end of each month?
+    Reply Link
+    Jeremy Hannah March 23, 2007, 8:29 pm
+
+    Does the cron job have to reside in /var/spool/cron/crontabs, or can the cronjob reside anywhere?
+    Reply Link
+    nixCraft March 24, 2007, 4:55 am
+
+    Jeremy,
+
+    Yup it is the default location under /var file system. You can change this location by recompiling software.
+    Reply Link
+    Aravind Miryala April 7, 2007, 3:32 pm
+
+    I want to schedule cron jobs for First Saturday of Every MOnth. Your help is appreciated
+    Reply Link
+    nixCraft April 7, 2007, 9:53 pm
+
+    Aravind,
+
+    You need to write a smart script that will detect First Saturday of Every Month as you can not write such cron job. You can also try following trick:
+    00 01 1-7 1-12 * if [ "$(date +%a) = "Sat" ]; then /path/to/script.sh; fi
+
+    Add additional logic in /path/to/script.sh to detect First Sat of each month.
+    Reply Link
+        Pankaj Sain May 5, 2011, 11:31 am
+
+        We can do this by the following also..
+
+        01 00 1-7 * 6 /path/to/script.sh
+
+        However no need to reply on this so old, but only for the new comers..
+
+        This Site provides really great info. for newbies and the masters too.
+        Reply Link
+            lucky February 28, 2012, 4:22 pm
+
+            Hi,
+            pankaj can u tell me how to schedule second saturday of every month and explain how job run on every first saturday above cronjob.
+            Reply Link
+    Valli April 19, 2007, 2:42 pm
+
+    What does 00 14 29 12 4
+    mean?
+    Reply Link
+    John T. April 19, 2007, 7:28 pm
+
+    Vali,
+
+    # Use the hash sign to prefix a comment
+    # +—————- minute (0 – 59)
+    # | +————- hour (0 – 23)
+    # | | +———- day of month (1 – 31)
+    # | | | +——- month (1 – 12)
+    # | | | | +—- day of week (0 – 7) (Sunday=0 or 7)
+    # | | | | | +- command to be executed
+    # | | | | | |
+    # * * * * * command
+    0 14 29 12 4 /path/to/command
+
+    command will be run at 2pm Dec 29th in addition to every Thursday in December I believe.
+    Reply Link
+        Sahithi February 23, 2014, 8:33 am
+
+        In addition to every thursday? or will it run only if Dec29th is thursday
+        Reply Link
+    Lakshmi Shastry April 26, 2007, 7:44 am
+
+    I need to write a cron expression which fires every 5 hours from the given start time. Ex:- If 8.30 am is my start time then the cron expression will be something like “30 8,0-23/5 * * *”. But this fires in the time sequence like at 8.30, 10.30, 15.30, 20.30, 00.30, 10.30 etc…
+    But what i need the time sequence is 8.30, 13.30, 18.30, 1.30, 6.30, 11.30, 16.30, 21.30, 2.30… which means that fire should occur for the specified start time and every 5 hours after that. Can anyone help me with the cron expression to represent the same. Thanks a lot in advance.
+    Reply Link
+        rahul November 15, 2010, 1:09 pm
+
+        hey lakshmi ..
+        firstly you check this command “crontab -l Display your crontab file.” that show you presentally crontab.After that see your chron scrip ki chang or not .there is some two hours interval . You want run this scrip in all day of week. Then in this case you use this script.. “30 8:30,13:30,18:30,1:30,6:30,11:30,16:30,21:30,2:30 * * # give your destinestion path#
+
+        and other wire u check the chmod permision if this script solve your problem .so plz reply
+        Reply Link
+            rahul November 15, 2010, 1:11 pm
+
+            Then in this case you use this script.. “30 8,13,18,1,6,11,16,21,2 * * # give your destinestion path#
+            sorry for that check this script
+            Reply Link
+    vinod April 27, 2007, 3:24 pm
+
+    i hope
+    30 1-23/5 * * * /aaa.sh
+    will work
+    Reply Link
+    GC Hutson May 26, 2007, 9:18 pm
+
+    Since CRON cannot be used to schedule tasks by the second, what can be used/written/done to perform tasks as such?
+    Reply Link
+    Ap_1 May 30, 2007, 5:35 am
+
+    Hi,
+    I added 1 enrty in crintab using crontab -e,i added below line in that file
+    0 23 * * 1-5 root echo “I will run at 11”
+
+    but after 11:00 clock also its not running….
+    y any idea ???
+
+    I checked,Cron shell is running……then y that command didnt run..
+    Plz help regarding this
+    Reply Link
+    Johan August 15, 2007, 6:06 pm
+
+    Hello,
+
+    When i try to run crontab i get the following error message “failed user root parsing”.
+
+    And the cron is not executing anything.
+
+    The command crontab -l indicates that everything is fine and that i have scheduled a command correctly.
+
+    Also checked that the service is running “crond”
+
+    cant get cron to work please help!
+
+    I am using Puppy linux 2.16
+
+    Thanks for help, my email is: Johan@mediavisiongroup.se
+    Reply Link
+    Ivan Versluis December 19, 2007, 10:22 am
+
+    Thank you. I needed some help on scheduling my ntpdate in a virtual linux machine.
+    Reply Link
+    vasanthan January 17, 2008, 2:53 pm
+
+    problem with setting cronjob..
+
+    i woud like to kow how to run a mail.php
+    file everday..on my server..5 0 * * * /path/to/command..the thing is i dont know the
+    command ..please help me..
+    Reply Link
+    lalith January 18, 2008, 10:55 am
+
+    Can any one help me iam using Debain 3.0 server when iam setup a file for cron job,it was not working.
+    Reply Link
+    sateesh January 18, 2008, 11:40 am
+
+    we can use */15 * * * * cmd also to run every 15 minutes
+
+    regards.
+    sateeshlinux.blogspot.com
+    Reply Link
+    neo January 21, 2008, 10:36 am
+
+    Hi,
+    My cron manage to execute at the desired time but the email i received is “permission denied”. I copy and paste the message below
+
+    “/bin/sh: /usr/bin/lynx: Permission denied”
+
+    The cron command is as follows :-
+
+    lynx -dump http://myurl.com/cgi-bin/autoresponder/activate.cgi
+
+    What it does is to log in toe activate.cgi at certain time of the day. By typing the url manually will require a password first and the command is executed.
+
+    Is this the problem that cause the permission denied ? If this is the case – how can i incorporate the password in the cron command line ?
+
+    Hope you can assist.
+    Thanks.
+    Reply Link
+    Shashi February 28, 2008, 4:34 pm
+
+    What is the meaning of this?
+
+    30 1 * * * /home/clean_parse_logs.sh >> /home/logs/clean_parse_logs.log 2>&1
+    Reply Link
+        vijay September 30, 2010, 5:23 am
+
+        it means at 1:30 morning, the clean_parse_logs.sh script starts running everday automatically and creates a clean_parse_logs in “/home/logs/” and then adds the information status of runing script “clean_parse_logs.sh” into the file “clean_parse_logs.log”.
+        Reply Link
+    thegetpr March 12, 2008, 12:51 pm
+
+    how i can start a crownjo for a life time
+    very minute every second every day, week ,month and year
+    Reply Link
+    venki March 12, 2008, 1:55 pm
+
+    i can’t say abt seconds.
+    * * * * * script
+
+    this will run the script for every min,hour,day,month,year.
+    Reply Link
+    rogier March 13, 2008, 10:13 pm
+
+    Hi there,
+
+    I want to execute a php file on my webserver (non-unix). I do have a unix server and I want to execute Insert.php on my non-unix server from my unix server.
+
+    Is that possible?
+    What do I exectly need to type?
+    And is it possible to give an URL instead of a normal Path?
+
+    thanx,
+
+    Rogier
+    Reply Link
+    thegetpr March 20, 2008, 10:34 pm
+
+    my crown job is working fine ***** script
+    but its execution time is very slow, how should i make it fast to work
+    Reply Link
+    Nilesh March 21, 2008, 1:34 am
+
+    Use fcron; which doesn’t wake up every minute to see whether there is a job to be executed. It sees the next time when to wake up and wakes up at the particular time only unless a user edited his fcrontab to wake it up before. It saves resources. The syntax is quite similar but there is some difference which can be learnt by using.
+
+    http://fcron.free.fr
+
+    it is available in fedora’s repos.
+    Reply Link
+    pravin March 31, 2008, 11:16 am
+
+    how do i append new task or crontab job using scprite in existing task
+    Reply Link
+    Rajitha May 13, 2008, 6:52 am
+
+    submitting the job in crontab is a bit confusing for the beginners.
+
+    in a text file(eg., file.txt) give all the cron jobs you want to schedule
+    eg., 15 14 * * * /root/dir/script.sh
+
+    and submit the file using crontab
+    crontab file.txt
+
+    in order to do this user need to have permisson, which can be seen using cron.allow file
+
+    if the crontab file is already existing use crontab -e to add ur job to the crontab.
+    if it is already existing crontab -l displays the existing jobs
+
+    one imp thing to remember is you need to provide all absolute paths in the script which u want to schedule, otherwise u will end up in thinking why my cron job is not running though it is added properly.
+    Reply Link
+        Diego March 9, 2011, 5:25 pm
+
+        wow, u r the first one in giving basics steps in how to do that. Thaaaaaank uuuu, not all people are geniuses here!!!
+        Reply Link
+        pushp August 23, 2013, 8:29 am
+
+        nice really helpful.i got it.thanks
+        Reply Link
+    Hans May 15, 2008, 9:28 pm
+
+    Nice tutorial,
+
+    To be complete it would be nice to mention:
+    /etc/cron.daily
+    /etc/cron.hourly
+    /etc/cron.deny
+    /etc/cron.monthly
+    /etc/cron.weekly
+    /etc/cron.d
+
+    As these are preferred afair
+    Reply Link
+    nixCraft May 16, 2008, 1:05 pm
+
+    Hans,
+
+    The faq has been updated.
+    Reply Link
+    lalit June 20, 2008, 6:41 am
+
+    Hi
+    I’m new in solaris.I want to create a cron job to delete a temp file in a directory and it run on every saturday of the week.
+
+    I have created a cron job as cron.txt.
+    0 12 19 6 4 rm /temp/*
+    Where will upload it?
+    How to run it?
+    .
+    Reply Link
+    Rafiuddin July 29, 2008, 10:37 am
+
+    To remove or erase all crontab jobs
+    command:# crontab -r
+
+    Instead of -e as mentioned in the tutorial……
+    Reply Link
+    nixCraft July 29, 2008, 11:32 am
+
+    Rafiuddin,
+
+    Thanks for the heads up. The faq has been updated.
+    Reply Link
+    Amjad August 23, 2008, 12:26 pm
+
+    Thank You aLot, It’s help full answer
+    Reply Link
+    rptirore September 23, 2008, 5:53 am
+
+    good one!
+    Reply Link
+    Rupo October 7, 2008, 8:54 am
+
+    Is it possible to set up cron so that once it started, it will run 7 minutes later, then 3 minutes later, and then 7 minutes later i.e. running twice every 10 minutes
+    Reply Link
+    Ben November 25, 2008, 2:35 am
+
+    Is the eight special string suitable use for all type/version of linux operating system? (eg.Red-hat, Ubuntu)
+
+    Example:
+    Special string Meaning
+    @reboot Run once, at startup.
+    @yearly Run once a year, “0 0 1 1 *”.
+    @annually (same as @yearly)
+    @monthly Run once a month, “0 0 1 * *”.
+    @weekly Run once a week, “0 0 * * 0”.
+    @daily Run once a day, “0 0 * * *”.
+    @midnight (same as @daily)
+    @hourly Run once an hour, “0 * * * *”.
+    Reply Link
+    nixCraft November 25, 2008, 6:38 am
+
+    Ben
+
+    Yes, they works with Linux / UNIX as long as your are using Paul Vixie’s crond.
+    Reply Link
+    Ben November 25, 2008, 9:43 am
+
+    Thank you a lot. it is help me a lot.
+    Reply Link
+    Subeesh December 9, 2008, 8:12 am
+
+    Hi,
+    I want to run a script – everyday 12:00 am – 01:00 pm every 5 minutes,
+    Please help me
+    Thanks,
+    Subeesh
+    Reply Link
+        vawani December 8, 2011, 9:33 pm
+
+        */5 00-13 * * *
+        Reply Link
+    karthikesan December 12, 2008, 3:02 pm
+
+    Hi
+    I want to run hourly job.
+    The script :
+    $userp=`du -cskh /path/ |sed -e ‘G//g’`
+    ALERT=90
+    $st=echo”if($userp > $ALERT) 1 |bc ”
+
+    when i run this .The cron is giving me a error like use test and at this line iam getting error
+    like teletype (u can’t use this option -c -h).
+    1)crontabs -e
+    2)Cronjob
+    ********
+    5 * * * * /path/scripts
+    Please help me
+    Thank
+    kathi
+    Reply Link
+    Nayibe December 16, 2008, 6:42 pm
+
+    I need to set up a cron that runs a script every other Friday.
+    Reply Link
+    Harrel January 2, 2009, 9:27 am
+
+    I want to add a cronjob or the following cron command
+
+    /usr/bin/php -f /homepages/33/d249180215/htdocs/iem/admin/cron/cron.php
+
+    I entered
+    *****/usr/bin/php -f /homepages/33/d249180215/htdocs/iem/admin/cron/cron.php
+
+    in ssh via putty
+    but it’s giving error like pattern not found: usr
+
+    Can anyone help? I use 1and1 hosting.
+    Reply Link
+    Ramit January 9, 2009, 12:19 am
+
+    This is not working. What is wrong
+    MAILTO=”4085298665@txt.att.net”
+    0 3 * * * /root/backup.sh >/dev/null 2>&1
+    Reply Link
+        swati February 20, 2013, 12:31 pm
+
+        you are using both one to mail the response the first line of the code and on the other hand >/dev/null 2>&1 means stopping the output to forward as mail . use either of them.
+        Reply Link
+    SHEETAL.A January 9, 2009, 5:24 am
+
+    hi,
+
+    I want to use cron job for backups. I am using suselinux 9.0
+    Reply Link
+    googleguy February 21, 2009, 5:44 pm
+
+    Well
+    3**** /path/to/command
+    means to run command every 3rd minute of every hour not every 3 mins ……..
+    understand this diff………to make it run every 3mins we have to do
+    */3****/path/to/command
+    And to add php file to crontab add #!/usr/bin/php //this in to php file
+    and also to crontab file .(property of file and folder shd be rwx );
+    Reply Link
+    Download Free Photos February 24, 2009, 12:05 pm
+
+    Many thanks, it’s help me a lot.
+    Reply Link
+    amit March 25, 2009, 9:21 am
+
+    Hi,
+    I put following in a file named ‘cronjob’ in the /etc/cron.d
+    */5 * * * * root /etc/cron.d/script.sh >> /opt/cronjobs/cron.log
+    but dont see any thing happening. Pls suggest
+    Thanks
+    Reply Link
+    maaly March 26, 2009, 9:15 pm
+
+    write echo command that print “hello” message on o
+    every day at a 2 am at the morning for the first week of the month
+    Reply Link
+    Subeesh April 2, 2009, 6:27 am
+
+    Hi all,
+    I want to write cron to run a script from 12 noon to 11:30 pm, every 5 minutes
+    I have written like this, which I guess, it works from 12 noon to 11 PM only,
+    0-55/5 12-23 * * * /path/to/command
+    but how should I re-write it to run the script from 12 noon to 11:30 pm, every 5 minutes ?
+    Thanks in advance,
+    Subeesh
+    Reply Link
+    Haid Avila April 22, 2009, 2:28 am
+
+    Hi, I´ve just made my script and put it into crontab…
+    I want my script to run this command ( opensipsctl fifo lb_resize 1 pstn 0) if ping fails.
+    It looks like this…
+
+    #!/bin/bash
+    # add ip / hostname separated by while space
+    HOSTS="192.168.0.11"
+    # no ping request
+    COUNT=1
+     for myHost in $HOSTS
+    do
+      count=$(ping -c $COUNT $myHost | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
+      if [ $count -eq 0 ]; then
+        # 100% failed
+        opensipsctl fifo lb_resize 1 pstn 0
+      fi
+    done
+
+    If I run the script from the command line it works nice and smooth, but if it runs from the CRON it doesn´t work
+
+    I have this on my crontab so it will run every minute
+
+    0-59 0-23 * * * /etc/opensips/monitor_server1.sh
+
+    If I look at my LOG, my CRON call it
+    Apr 21 21:25:01 [cron] (root) CMD (/etc/opensips/monitor_server1.sh )
+
+    But it doesn´t work…
+
+    Any idea?
+    Regards!
+    Reply Link
+        nixCraft April 22, 2009, 6:21 am
+
+        Use full path names in cron jobs.
+        Reply Link
+        Dhruv Patel October 13, 2011, 7:28 am
+
+        For every minute use * * * * * /etc/opensips/monitor_server1.sh
+        Reply Link
+    Haid Avila April 22, 2009, 5:47 pm
+
+    Thanks for your advise Vivek
+
+    Regards!
+    Reply Link
+    Russell May 22, 2009, 2:30 am
+
+    Question, I’m running UBUNTU 9.04 and when it start up it checks and set the time only ounce, I need a cron job that will check and set the time hourly as long as the program is running. And to say that I don’t know what I doing is a understatement. I’m trying to get this mailserver to keep correct time. Thanks for the help. Russell
+    Reply Link
+    dinesh June 2, 2009, 10:31 am
+
+    hi
+    i wnt to know how i can schedule backup though crontab.
+    please send a particular script to me on my {snip_no_email_ids}
+    Reply Link
+    dinesh kumar midha June 2, 2009, 10:40 am
+
+    i hv used hints for tunning (max hints was orders )
+    now i m running the report but it is not work
+    ora-01652 unable to extend temp segment by 128 in tablespace temp
+
+    i have added new datafile or resize also but it is not working
+    if u hv any idea plz give the solution
+    Reply Link
+    MsfStl June 16, 2009, 2:41 pm
+
+    I have a cron job with multiple jobs listed at various times throughout the day.
+
+    I have two questions:
+
+    1) For each job, is it possible to reset the MAILTO statement to a different user? (E.g., Cathy is a user for a cron job that runs at 11:30 PM every day, her cron job is:
+    30 23 * * * /usr/local/bin/sas -noterminal /users/adrc/cathy/imaging/makedata.sas &
+    Scot is a user of a cron job that runs at 2:39 AM every day, his cron job is:
+    13 2 * * * /usr/local/bin/sas -noterminal -sysin /users/adrc/scot/sas_program
+    s/batch_scripts/hpdabat.sas & )
+    So is it possible to set a MAILTO= Cathy@domain.com prior to her cron job and then set another MAILTO=Scot@domain.com for his cron job?
+
+    2)While my cron jobs work, I have been receiving the following failed message:
+    /bin/sh:
+    : command not found
+
+    Any ideas what could be causing this?
+
+    Thanks for your time.
+    Reply Link
+        nixCraft June 16, 2009, 3:16 pm
+
+        1) For each MAILTO add cronjob to users account and not to root users account. Run:
+
+        crontab -e -u cathy
+
+        2) /bin/sh is not installed hence you see the error. A
+        Reply Link
+    amol June 21, 2009, 4:53 am
+
+    I have added following script to crontab , but it fails to execute at Schedule time
+
+    00 0,2,4,6,8,10,12,14,16,18,20,22 * * * [ -x /usr/local/SAN/rcomsapp40db/rcomsapp40db] && /usr/local/SAN/rcomsapp40db/rcomsapp40db
+
+    Other scripts/cronjobs with same syntax are working fine.
+
+    Any ideas what could be causing this?
+    Reply Link
+    MsfStl June 22, 2009, 2:02 pm
+
+    Thank you, Vivek.
+
+    I now have the Mailto working.
+
+    However, now instead of the fail message “: command not found”, I get a null fail message. Basically, it’s just an email stating the cron job failed, but nothing in the message. Just blank.
+
+    I appreciate any help in correcting this.
+
+    Thanks,
+
+    Scot
+    Reply Link
+        nixCraft June 22, 2009, 3:03 pm
+
+        Make sure you have correct PATH settings set for your contab. Also, use full path when run jobs via crons.
+        Reply Link
+    MsfStl June 22, 2009, 3:15 pm
+
+    Thanks again Vivek. I believe I found out what was going on. I had the following job scheduled:
+
+    17 2 * * * /usr/local/bin/sas -noterminal -sysin /users/adrc/scot/sas_programs/batch_scripts/hpdabat.sas 2>&1 | mail -s “RE: Scot HPDA Cron Fail” scot@xxxxxx.edu
+
+    What was happening (and this is where my inexperience comes in) is that the code “2>&1 | mail – s….” was set to send an email everytime the job ran with the subject line ” RE: Scot HPDA Cron Fail”. I was piping that to run everytime (I thought it would only send if it failed.) The “2>&1” code basically states that the email include a standard error message, if there is one, along with any other message. Since there was no error message the code did what I told it to and sent me an email called “RE:Scot HPDA Cron Fail” with nothing in it. The job works as it should. I have decided to remove the mail code and just let it do it’s thing.
+
+    Thanks again,
+
+    Scot
+    Reply Link
+        nixCraft June 22, 2009, 3:38 pm
+
+        Good.
+
+        Or you can add mailing code in your script itself:
+
+        [ $? -ne 0 ] && mail -S “blah” blah@exampl.com
+        Reply Link
+    Rituparna June 23, 2009, 9:13 am
+
+    Hi
+    I ‘m trying to schedule a batch job that will show the disk space occupied of my present working directory at every 15 minutes daily from 2:15pm for the month of June and the output will be mailed to my email id.
+
+    the script is as follows
+
+    crontab -e
+
+    15 14 6 * * //df -h
+
+    saving the file with myfile.txt and then when i type crontab myfile.txt an error comes up saying
+    “myfile.txt”:1: bad minute
+    errors in crontab file, can’t install.
+    Reply Link
+    Rituparna June 23, 2009, 9:15 am
+
+    just a bit of modification to the above
+    it is 15 14 6 * * //df -h
+    Reply Link
+    Rituparna June 23, 2009, 9:17 am
+
+    just a bit of modification to it
+    15 14 6 * * //df -h
+    Reply Link
+    Narendra June 29, 2009, 5:52 am
+
+    Hi,
+    How can we call php page from CRONTAB in every 5 seconds. I had used this by using sleep funtion with some logic. Script executes for a time and sleeps for 5 seconds for 10 times within 1 minute interval. But the problem occurred is sever gets too busy when I called crontab file like this.
+    So I would like to know how can file be executed in every 5 seconds without any problem?
+    Reply Link
+    nami June 30, 2009, 5:27 am
+
+    does all the files in /etc/cron.daily folder on a daily basis.
+    Actually i have copied a sh file in this folder yesterday but it did not get executed .
+    As if this file is executed one of my tables in the database gets updated.
+    I am not sure whats going wrong
+    Reply Link
+    nami June 30, 2009, 7:21 am
+
+    According to this link the files under /etc/cron.daily should get executed….
+    But in my case its not getting executed
+    i used putty to copy the file from one of the directories in the system to the /etc/cron.daily directory….
+    Would some permissions be causing it to not execute it.
+    http://www.debian-administration.org/articles/56
+    Reply Link
+    nam June 30, 2009, 8:16 am
+
+    This link specifies all the files under this directory will be executed daily…
+    http://www.debian-administration.org/articles/56
+    But in my case it is not executing is it some permission issue
+    my crontab file looks like below :
+
+    //////crontab////////////////
+    SHELL=/bin/bash
+    PATH=/sbin:/bin:/usr/sbin:/usr/bin
+    MAILTO=root
+    HOME=/
+
+    # run-parts
+    01 * * * * root run-parts /etc/cron.hourly
+    02 4 * * * root run-parts /etc/cron.daily
+    22 4 * * 0 root run-parts /etc/cron.weekly
+    42 4 1 * * root run-parts /etc/cron.monthly
+
+    //////crontab////////////////
+
+    There is no cron.allow file.The cron.deny file does not contain anything.
+    Reply Link
+    Ben July 30, 2009, 2:00 am
+
+    hi,
+    if i put both cronjob in crontab which one will run first?
+
+    eg:
+    @yearly Run once a year. 0 0 1 1 * /path/to/command
+    and
+    @monthly Run once a month. 0 0 1 * * /path/to/command
+    Reply Link
+    Aditya September 14, 2009, 1:12 pm
+
+    Hi i have to run a Command in eyery minute Command is hwclock –hctosys , how i can make entry in Crontab ,m is a new for Crontab ,Please Help me …….mine mail id is
+    Reply Link
+    Sunil September 27, 2009, 11:47 am
+
+    Hi,
+    Please let me know how to make a cron entry for this scenario:-
+
+    A task should be executed at 1st month of every quarter and on every Sunday at 10:30 am.
+
+    Thanks in Advance…
+    Reply Link
+    Guiscard October 29, 2009, 5:16 am
+
+    Hello, I m using a linux server, and I’d to know if anyone knows a script that can clear the
+    /tmp/ dir every 1 hour.
+
+    I am currently doing manually. The directory gets full every few hours due to too many activities on the server.
+
+    I currently run the following:
+
+    rm -rf /tmp/*
+
+    what can i do to automate that?
+    Thank you – Guiscard
+    Reply Link
+    srinivashan November 10, 2009, 12:06 pm
+
+    hai gays ,
+    i am a new bee to linux and i am using fedora 11 and i want to take a backup
+    files daily so anyone help mee plzzz
+    how to create cronjob and with commands
+    for exp: i have a file in /root/desktop/srinnivas and i want to save it to another plc like
+    my mail id is cnus01@gmail.com plz hlp
+    Reply Link
+    srinivashan November 10, 2009, 12:08 pm
+
+    in /root/backup
+
+    my mail id is cnus01@gmail.com plz hlp
+    Reply Link
+    srinivashan November 10, 2009, 12:32 pm
+
+    hai gays
+
+    i want to run this cammand daily ( cp /root/desktop/123.flk /root/srinivas/imp files/ )
+    using corn jobs or is there any other way to run this command daily automaticaly
+    plz hlp me anyone
+
+    thanks srinivas
+    Reply Link
+    Jade November 14, 2009, 2:33 am
+
+    Wonderful article. Thanks!
+    Reply Link
+    map007 November 20, 2009, 7:06 am
+
+    Hi,
+
+    I want to run cron job in every 20 second, so i have created following script.
+
+    #!/bin/bash
+    while true
+    do
+    /usr/bin/php -q /home/abc/public_html/Cron.php &
+    pid=$!
+    sleep 20
+    kill -SIGKILL $pid
+    done
+
+    But its not working…. Please guide me if i m wrong……….
+
+    Thank you.
+    Reply Link
+    Ducky November 25, 2009, 10:06 pm
+
+    I am new to CRON command. What I want is to have a CRON job execute myWeb Service which takes two parameters. Maybe I should use a .sh file instead of the whole URL with parameters in the command line. Can someone give me a simple sample, thank you.
+    Reply Link
+    Ani November 27, 2009, 4:44 am
+
+    Hai,
+
+    How to send a request to a webserver all times when i power on my system(fedora) automatically to indicate im online?
+    Reply Link
+    Ramakrishnan December 3, 2009, 6:31 am
+
+    Hi,
+    how to create cron job for running klinkstatus link checker for daily that must send html format output from klinkstatus to a emailaddress.
+    How to create it?
+
+    Thanks
+    Ramakrishnan t
+    Reply Link
+    anil December 4, 2009, 9:45 pm
+
+    HI,
+    I am using cron jobs.It is working fine.It fetches some links and stores in database. But the problem is when i first run the cron it has fetched 5,000 links per hour.After that it is very slow.Now not even fetching 100 links per hour.What can i od to improve?
+    Reply Link
+    Russty December 23, 2009, 4:12 pm
+
+    I need to know how to make a script run every 20 minutes.
+    Reply Link
+    Raj January 2, 2010, 8:32 am
+
+    Guys,
+
+    I want the following to run every 1 hour. Can you please tell me what to do?
+
+    tmpwatch –mtime –all 144 /tmp
+    Reply Link
+    Noori February 9, 2010, 2:15 am
+
+    1. Immediately after installing a new server one of the things you should do is document exactly what files are suid. As part of your job monitoring a server you will periodically look at what files on the server are suid. A file suddenly becoming suid when it was not originally is a sign that your server has been compromised. What UNIX command will list all files that are suid on the server? What UNIX command will list all files that are sgid on the server?
+
+    2. Write a bash script which could be scheduled in cron to run nightly. The script would execute the two UNIX commands from step 1 above. If there is a difference between the original file (listing the suid files on the server) that you created when you installed the server and the file generated when you ran the cron job then you must email the administrator with the details of the differences. If the suid files on the server have not changed, do nothing.
+
+    Can someone Please help me solve the above two task. I kindly appreciate.
+    Thank You
+    Noorii
+    Reply Link
+    Ganesh April 1, 2010, 7:59 am
+
+    Hi,
+
+    I want to run my SAS code everyday at 4:30pm on unix server. can any one help me in creating a cornjob ?
+
+    Thanks
+    Reply Link
+    siva April 28, 2010, 1:21 pm
+
+    how to schedule a job with time 08:45:30 am every day and every month?
+    Reply Link
+    siva April 28, 2010, 1:34 pm
+
+    how to display which are modified time(mtime) between 5 t0 10 days in unix?
+    Reply Link
+    sss April 28, 2010, 1:50 pm
+
+    how to display which are modified time(mtime) between 5 t0 10 days in unix?
+    Reply Link
+    Naseer May 19, 2010, 6:29 am
+
+    how to turn on system automatically while system is in turn off state
+    Reply Link
+    johnny June 8, 2010, 8:58 am
+
+    helllo…
+    i have problem about my server elastix…
+    i configure crondtab for automatic reboot
+    but my mechine cannot reboot time i set.
+    how to solve..
+    help me…….
+    thanks
+    Reply Link
+    Anonymous June 11, 2010, 11:14 am
+
+    Hi,
+
+    Can anyone tell me how to set jobs in cron tab
+    Reply Link
+    Anonymous June 11, 2010, 11:15 am
+
+    Kishore,
+
+    Can anyone tell me how to run pl/sql jobs in unix.
+    Reply Link
+    Santiago June 14, 2010, 3:57 am
+
+    below script is not running on linux, the /bin/sh has been defined in the $PATH. Kindly advise ?
+
+    =======================================
+    #!/bin/sh
+
+    export INFORMIXDIR=/opt/informix/11.50.FC6
+    export INFORMIXSERVER=czchols1790_1_soc
+    export ONCONFIG=onconfig_1
+    export PATH=$INFORMIXDIR/bin:$PATH
+    export TERMCAP=$INFORMIXDIR/etc/termcap
+
+    dbaccess gcdb < bash
+    Reply Link
+    Arps June 17, 2010, 6:22 am
+
+    Hi,
+    i want to create a cron job to check the no of filehandler every hour in my application. can anyone help me
+    Reply Link
+    nany June 21, 2010, 5:58 am
+
+    I set my command at
+    45 01 * * * /PullMissingFiles/GeneralScripts/GenericPullFilesScript.sh
+    the script is running for yesterday
+    MONTH=`TZ=CST+24 date +%m`
+    DAY=`TZ=CST+24 date +%d`
+    YEAR=`TZ=CST+24 date +20%y`
+
+    if [ “${#DAY}” -eq 1 ]
+    then
+    DAY=”0$DAY”
+    fi
+
+    yesterday=$YEAR$MONTH$DAY
+
+    but the result is pulling for 2days ago (e.g. if today is 21 we will got the result of 19th)
+
+    ?????please help me
+    Reply Link
+    MSK July 27, 2010, 11:10 am
+
+    I want to schedule a job which will execute only once in life time. Is it possible to schedule it using cronjob.
+    Please suggest.
+    Reply Link
+    Brian July 28, 2010, 7:51 am
+
+    it could be nice if you could write HOW you append in this so-called-editor that crontab is using….
+    Reply Link
+    vamsi krishna August 18, 2010, 3:20 pm
+
+    hey .,i have few questions
+
+    1)how can i append to the existing crontab file of root with automation?
+    like when i give as root –> crontab /var/shell.sh.everythin previously present is getting vanished.?help me
+
+    2)In the end i need to remove this entry at the time of uninstallation of my system?
+    Thx in advance :)
+    Reply Link
+    gaurab August 20, 2010, 7:20 am
+
+    How to set the cron job that runs every week on sunday 10 am.
+    10 * * * 1/path/to/command
+    Is the above one correct.Please guide me.
+    Reply Link
+        gese74 October 5, 2010, 5:04 pm
+
+        Hello Gaurab,
+
+        From your command
+        10 = tenth minute
+        * = every hour
+        * = every day
+        * = Every month
+        1 = Monday
+        So since you have Monday it automatically nullifies the every day.
+
+        So for your request the best should be
+        00 10 * * 0 or 7
+
+        I hope this helps
+        Reply Link
+    vamsi krishna August 20, 2010, 9:10 am
+
+    0 22 * * 0 path od the script to be executed
+    Reply Link
+    bobb September 2, 2010, 3:23 pm
+
+    HI all
+    i had to run java exe and wanted to add entry in crontab.
+    crontab entry
+    23 20 * * * /home/testing/CSS/Run_Alerts.sh
+
+    cat Run_Alerts.sh
+    #!/bin/sh
+    cd /home/testing/CSS/
+    nohup java css_main
+    still cron is not working,
+    -rwxrwxrwx 1 testing testing 58 Sep 1 20:21 Run_Alerts.sh
+
+    please advise
+    Reply Link
+        vamsi krishna September 3, 2010, 5:21 am
+
+        hey check whether cron service is up and running .
+
+        If thats up then check ur jdk version .First try to keep some echo statements in ur cron tab and try to write to a file .then u can ensure dat cron is working properly .
+
+        then u can keep ur own commands and try..ALL da best
+        Reply Link
+    Ali Mabrook September 8, 2010, 6:35 am
+
+    sometimes it shows errors
+    Reply Link
+    g September 9, 2010, 7:10 am
+
+    is my SH file is having mistake?
+    take alook…
+    [quote]
+    #!/bin/sh
+    tarikh=””$(date +%F_%R);
+    nama=”crm_”;
+    fileHasil=””$nama$tarikh.tar.bz;
+    targetLoc=”/usr/share/serverware/backup/”;
+    targetWeb=”/var/www/crm/”;
+    echo “Processing Backup for $tarikh”;
+    echo “Backing up in progress…”;
+    tar cvjf $targetLoc$fileHasil $targetWeb;
+    echo “Backed up Success! Saved on $targetLoc$fileHasil”;
+    [/quote]
+
+    I could execute it manually,but once I use it at CRONTAB
+    it never executed … why eh?
+    anyone have experienced about this before?
+    Reply Link
+    Reddy September 16, 2010, 1:38 pm
+
+    Hi,
+
+    i need to set up a corn job from Linux server to HP server,
+    Is it possible to set up the corn job from one server to another server without script.
+    Please advise
+    Reply Link
+    Nicole January 7, 2011, 3:58 am
+
+    Hi, could you please help me create a cron job (in php) that will check disk space every day and will send me email if it’s 75% full, and will not send me an email if it’s not.
+
+    Thank you so much! i’m a new bie.
+    Reply Link
+    Anbu January 14, 2011, 8:46 am
+
+    I want to kill the jboss server and restart the jboss server in linux machine.
+    Please provide the solution
+    Reply Link
+    a12345 February 21, 2011, 9:16 am
+
+    Hi all,
+
+    I want to run a particular script say a.sh daily at some particular time…
+    Is it fine if I place the script which i have to run(a.sh) in cron.daily directory???
+    or
+    Do I have to edit crontab???
+
+    Please help me out!!!
+
+    Thanks in advance!
+    Reply Link
+        nixCraft February 21, 2011, 10:16 am
+
+        Yes, place your script in /etc/cron.daily/ so that it will get run once a day. If you need to run the script, say at particular time (6 pm everyday), than add it to user crontab.
+        Reply Link
+    ramaraj ponnan March 3, 2011, 8:10 am
+
+    Hi,
+    I need a cron job .
+    if the username and password is wrong while entering into any application, it should
+    generate a mail to some mail ids, every after 20 sec of logging (error logging)
+    Reply Link
+    Shuja Ali March 7, 2011, 5:56 pm
+
+    Hi,
+
+    I have a cronjob that runs as follows:
+    PATH=/usr/bin:/bin:/usr/local/mysql/bin:/opt/TKLCixp/prod/db/utils/sql
+    22 17 * * * /home/cfguser/housekeeping/Daily_Scripts/Sessions.sh >/dev/null 2>&1
+
+    When the script runs it runs a .sql file located in directory “/opt/TKLCixp/prod/db/utils/sql” and the error message from mail is shown below:
+    From cfguser@ixp0001-1a Mon Mar 7 16:46:01 2011
+    Date: Mon, 7 Mar 2011 16:46:01 GMT
+    From: root@ixp0001-1a (Cron Daemon)
+    To: cfguser@ixp0001-1a
+    Subject: Cron /home/cfguser/housekeeping/Daily_Scripts/Sessions.sh
+    X-Cron-Env:
+    X-Cron-Env:
+    X-Cron-Env:
+    X-Cron-Env:
+    X-Cron-Env:
+
+    sqlplus: error while loading shared libraries: libsqlplus.so: cannot open shared object file: No such file or directory
+
+    When the script is run from commandline it is fine, but cron fails with above error. I suspect its something to do with environment variables. Is it something I should add to my cron or script to declare which directories it should include when running.
+
+    Br,
+    Shuja
+    Reply Link
+    Rao March 23, 2011, 12:20 am
+
+    Hello,
+    I have running cron job for a while now but now recently at my work they changed the mail server to a different smtp server. How do I update the new SMTP server. I really appreciate any help…!
+
+    Thanks
+    RG
+    Reply Link
+    Naraen Sridharan March 28, 2011, 5:22 am
+
+    Guys,
+
+    “—– Day of week (0 – 7) (Sunday=0 or 7)” This line in the post is wrong. Its always 0-6 and never 7. If you use 7 the whole crontab file cannot be parsed by its parser.
+
+    Thanks,
+    Naraen
+    Reply Link
+    Krushna April 12, 2011, 3:59 am
+
+    HI,
+
+    I want to run a 2 line shell script in crontab .If i run the script from konsole, its working fine. In crontab, its not working.The very first line is executing but not the second line. The script contains
+    chown x.x /source/ -R
+    sudo -u x rsync -azvH –remove-source-files /source/ x@:/destin/
+
+    (private key and pub key added in source and destination, no need of authentication for user x )
+    please advise me.
+
+    cronntab entry is :-
+    */30 * * * * /path/rsync.sh >> /path/rsync.log
+    Reply Link
+    Rohit May 16, 2011, 9:56 am
+
+    Hi,
+    I am a newbie to linux. I wanted a shell script to run every 2 minutes.So i wrote the following in my crontab:
+    2 * * * * /path to script
+    What do i have to do next to make sure that the cron is running? Because i see that the job is not running.Can you please help?
+    Reply Link
+        Amode May 24, 2011, 10:36 pm
+
+        What you need here for this command to run is just this:
+        */2 * * * * command
+        hope this will help good luck.
+        Reply Link
+    Dhinesh May 25, 2011, 9:17 am
+
+    Is Crontab is only used for scheduling the scripts only?
+    Reply Link
+    fawaz June 10, 2011, 10:28 am
+
+    I have this message coming up any time I want to run crontab,”No crontab for root”. This is despite the fact that all my cron commands and files are owned by root. I am using RHEL 5.5 X 86_64 version of linux. Any help. please?
+    Reply Link
+    MrCompTech July 4, 2011, 6:02 pm
+
+    i have a script ‘awstats-mrcomptech.com’ in the /etc/cron.hourly with the permissions 744, it is owned by root/root but it is not running, It did run at one time, so I must have inadvertently changed something, but I can’t see what I did to cause this hourly cron jobs to not run!
+
+    how are the hourly cron jobs in ‘/etc/cron.hourly’ triggered to run?
+
+    I can manually run the script with ‘/etc/cron.hourly/awstats-mrcomptech.com’ and it executes just fine.
+
+    This is causing a problem that if I am not available to manually run the script at least once per day then the awstats for that day show 0 visits even though the apache log file show over a hundred visits.
+    Reply Link
+    MrCompTech July 4, 2011, 6:10 pm
+
+    I found another post on the web that says a blank line is needed at the end of the script ‘awstats-mrcomptech.com’, I added the blank line and will now wait 52 minutes to see if it runs. i did edit that file so hopefully this will fix the problem!
+    Reply Link
+    MrCompTech July 4, 2011, 7:14 pm
+
+    Yes, that did the trick, have to have a blank line for the last line of my cron file!
+    Reply Link
+    Lexyz August 4, 2011, 10:40 am
+
+    Can someone explain to me what this script will do?
+
+    PATH-TO-PHP -q FULL-LOCAL-PATH-TO-DOMAIN/cron.php
+    Reply Link
+        MrCompTech August 5, 2011, 2:49 pm
+
+        It will run whatever is in the PHP script named ‘cron.php’. Since it’s named ‘cron’ and is associated with a domain and I’m assuming that the ‘domain’ is website, this script will probably doing something such as running an autoresponder, making a backup of the website or backing up the MySQL database for the website.
+
+        Without the script it is impossible to provide specific details.
+
+        If you would like more detailed information about this script you can send me a copy using the form on my website at http://mrcomptech.com/index.php/ask-a-technology-question.
+        Reply Link
+    Lexyz August 5, 2011, 3:22 pm
+
+    HI,
+
+    I still not get what this cron job means, PATH-TO-PHP -q FULL-LOCAL-PATH-TO-DOMAIN/cron.php
+
+    I have a site…and a cron.php was located here: http://www.mysite.com/cron.php
+
+    And I dont know how to configure the cron job code.
+
+    Using the code, PATH-TO-PHP -q FULL-LOCAL-PATH-TO-DOMAIN/cron.php
+
+    Where PATH-TO-PHP is the local path on your server to php and FULL-LOCAL-PATH-TO-DOMAIN is the full local path on your server to where you have the script installed.
+
+    so, using my site…. what will i put to replace PATH-TO-PHP and FULL-LOCAL-PATH-TO-DOMAIN
+
+    or…can you put here example?
+
+    please help. Thanks..
+    Reply Link
+        MrCompTech August 5, 2011, 4:37 pm
+
+        Hi Lexyz,
+
+        The instructions you received for using the script are generic. They have to be because the programmer cannot know on what server OS (Windows/Linux) or what version of the OS you will be putting the script on.
+
+        Are you using purchased web hosting services for your website? If so then depending on your hosting provider you maybe able to use your cPanel to add the cron job. Most hosting providers also include ‘How-To’ video tutorials for their customers. These are usually located near the top of the cPanel.
+
+        If the video tutorials are not sufficient then most likely you will have to contact your web hosting provider.
+
+        If you host your own server or have purchased a VPS (Virtual Private Server) then I may be able to help you more. For example PHP is usually installed in ‘/usr/bin/php’. On your own server or VPS you must have root access to setup this cron job. But if it’s not your server then you most likely do not have ‘root’ access and that is why you would need to get instructions from your hosting provider on how they have configured their servers and whether or not they allow you to add a cron job.
+
+        If I were adding this to one of my hosted web sites I would try to use the ‘Cron Jobs’ module in the cPanel to add the command to the list of commands as:
+
+        php -q /publichtml/cron.php
+
+        This may or may not work. My hosting provider does not provide a video on How-To setup a cron job so if this didn’t work I would have to contact my hosting provider for instructions.
+
+        On my own server for my website http;//mrcomptech.com and assuming the file cron.php were in the root of my website and assuming I wanted this command to run once every hour..
+
+        In the directory /etc/cron.hourly/
+
+        I would create the file named ‘mysite.com.cron.php’ (the name is arbitrary)
+        and this file would contain these 3 lines:
+
+        #!/bin/bash
+        /usr/bin/php /var/www/clients/client1/web1/web/cron.php > /dev/null
+        exit 0
+
+        Note there is a space after ‘/usr/bin/php’.
+        The file permission would need to be 744 so that the system can execute it.
+        To test that it worked, at the command prompt, I would run the command
+
+        /usr/bin/php /var/www/clients/client1/web1/web/cron.php
+
+        and then check to see that what it was supposed to do, it did. The script ‘cron.php’ is not a standard script, it is not something that is part of every website. So I can’t tell you specifically what your script is supposed to do without the script and any other scripts to which it it refers.
+
+        Have A Nice Day! (HAND!)
+        Reply Link
+    Lexyz August 5, 2011, 4:42 pm
+
+    Thanks for the help.
+
+    I will check this out.
+
+    Great!
+    Reply Link
+    MrCompTech August 5, 2011, 4:47 pm
+
+    You welcome and if you or anyone has any computer/Internet/technology question I would be happy to answer them at http://mrcomptech.com/index.php/ask-a-technology-question
+    Reply Link
+    Ashish September 7, 2011, 8:17 am
+
+    Hi,
+    I would like to schedule a crontab entry for a SAP script which should run quarterly, after every three month on Saturday (any weekend) but just one Saturday of the month.
+
+    I thought of below entry to be added:
+
+    0 22 * 3,6,9,12 6
+
+    I doubt bcoz of *, this will run on every Saturday of third month, where as I want to run it just one Saturday of the third month.
+
+    Could you please help me to create an entry which fulfil above criteria.
+    Thanks
+    Reply Link
+    MrCompTech September 8, 2011, 4:03 pm
+
+    @ Ashish
+    I haven’t tested this but I think this is what you want:
+    0 22 1-7 3,6,9,12 6
+    This should run at 22:00 (0 22) but only if it one of the first seven (1-7) days of months Mar, Jun, Sept, Dec (3,6,9,12) and then only if it is a Saturday (6).
+    Reply Link
+    Anup September 15, 2011, 5:34 pm
+
+    Hi,
+
+    I’m using VPS with cpx control panel in FREEBSD platform and have root access also thru UNIX command. I need to create a Cron Job schedule for user x to clear his inbox and Junk mail box every day by 3.00 am. How to do it. Also want to create a job for SENDMAIL to restart everyday by 3.15 am. Pls help
+
+    Anup
+    Reply Link
+    Pete September 27, 2011, 10:26 pm
+
+    Awesome article. Love your site, I always get excited to see this.
+
+    I *think* there might be a typo for sending emails to a custom address:
+    MAILTO=”vivek@nixcraft.in”
+    0 3 * * * /root/backup.sh >/dev/null 2>&1 (“2>&1” seems to disable email).
+
+    I’m not 100% sure on that, but I couldn’t get emails delivered until I removed 2>&1.
+    Reply Link
+    Paul Smith October 23, 2011, 3:09 am
+
+    Finally a blog with some insight into cron jobs. I have a question about the email issues. I have a dedicated server (just learning how to manage) for my websites and host a few of my friends sites on it also. One of them has a cron job set using cPanel and it reads:
+    curl -A “Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6” -s http://www.hissite.com/billing/coin_cron/invoices.php
+
+    However the emails get sent to my server address and not his domain address. I went into /etc/crontabs but if I change it to his address then all future cronjobs that I wanted to create would go there also, correct? Not what I want. How do I change it so he and any future clients emails will be sent to their domain? Sorry if this is confusing as I am just learning. Thanks in advance.
+    Paul
+    Reply Link
+    Rubli November 18, 2011, 10:27 am
+
+    Hi,
+
+    I have a weblgic server in solaries.I want to take the backup of the log files of my server after a particular period.How can i do that by using cron.
+    Reply Link
+    thiyagi December 1, 2011, 6:52 am
+
+    thanks, was useful..
+    Reply Link
+    Bobby January 18, 2012, 3:01 pm
+
+    I am trying to set up a cron job to create a daily mysql back up. I installed the job as follows:
+    crontab -e
+    05 10 * * * /usr/bin/mysqldump –all-databases -u root -p`*password` | gzip -c > /home/db_backup/database_`date +%a`.sql.gz
+    saved and closed the file
+    restarted cron daemon
+    The job will not run.
+
+    I verified the command works when run manually, but I am new to using cron. Any ideas?
+    Reply Link
+    reena January 20, 2012, 6:22 am
+
+    Hi i want to diplay a “Hiiiiii ” in evry minute by crontab.
+    So how to do that ? Please give me solution.
+    Its urgent as i hv no idea at all about cronjob
+    Reply Link
+    Muhammad Hammad Qadir January 20, 2012, 8:05 am
+
+    Hi every on, I newbie too i want to get a buckup of a folder the file is saved in that folder, I want to know how i can compress that folder like tar and then that compresssed tar file stored on a sperate location by crontab and should done in a 1 day of the week.
+
+    Your comments will be appriciated.
+    Reply Link
+    avinash January 22, 2012, 2:30 am
+
+    how to create a folder daily using cron job
+    Reply Link
+        kamesh March 29, 2012, 1:23 pm
+
+        Will you create the same folder name every time and in which ath you have to create?
+        Reply Link
+    avishay January 22, 2012, 8:34 am
+
+    I added a cron job but it doesn’t work. crontab -l shows my script * * * * * /tmp/some_script
+
+    pgrep cron shows 1471.
+    thanks
+    Reply Link
+    sandeep February 13, 2012, 12:22 pm
+
+    may i know how to give cron for 20 seconds
+    Reply Link
+        Amit G October 23, 2012, 10:55 am
+
+        smallest resolution is 1min. Look at alternatives : Quartz scheduler
+        Reply Link
+    kiran March 27, 2012, 6:13 am
+
+    Hi,
+    Can any one help me.
+    i need a cron job to sync data from linux pc/folder to other linux pc folder.
+    how to add password of other pc in script file.
+    can any one help me?
+    Reply Link
+    vedagiri April 9, 2012, 9:49 am
+
+    how i check whether the cron job running or not?pl any one help me
+    Reply Link
+    Mario April 24, 2012, 3:53 pm
+
+    how do I Add a cron job to send a timestamp to a file in their home directory every minute.
+    is it
+    crontab -e
+    then
+    * * * * 1 /timestamp/home/user/Documents.
+
+    I’m don’t think this is right. can anyone help
+    Reply Link
+        rj2029x October 5, 2012, 5:46 am
+
+        1 * * * * /timestamp/home/user/Documents
+
+        1st place = Minutes
+        2nd place= Hours
+        3rd place= Days
+        4th place= Months
+        5th place = Day of the Week
+        Reply Link
+            anonymous October 15, 2012, 11:27 am
+
+            It should be: */1 * * * * /timestamp/home/user/Documents
+            as if you only do: 1 * * * * /timestamp/home/user/Documents it will do it the first minute of everyhour and not everyminute of the hour
+            Reply Link
+    Jamshed Ahmed Qambrani June 9, 2012, 8:14 am
+
+    I’ve configured RMAN backups on daily basis like sundaay, monday, tuesday. these backup are place on PROD server. now i want a script which copy my daily rman backup to another server as , from source server A /u01/RMAN/backup/sunday to target server B /u02/RMAN/backup/09-June-2012 in current date format in which date backup was take place.
+    Reply Link
+    Arjay Almanzor July 16, 2012, 7:17 am
+
+    Can you please send me the example of Crontab script that will backup one folder or that can automatically generate report on internet.
+    also the steps how to do it.
+
+    thanks.
+    Reply Link
+    Reddy March 4, 2013, 2:02 am
+
+    Hi friends
+
+    One job scheduled to run on dally on the basis of receiving data from the upstream environment. My Issue is data had delay one day wat ll do?
+
+    waiting for reply
+    Reddy
+    Reply Link
+    Prabhakar Shelke April 4, 2013, 6:01 am
+
+    Hi,
+
+    I have total 4 cron job, and these are just send reminder mail to customer, these are given below,
+
+    First Cron – every four month Second Cron – every four month and 7 days Third Cron – every four month and 14 days Fourth Cron – every four month and 21 days
+    Suggest me How can i set up these cron jobs,
+
+    Thanks Inadvance….
+
+    Regards,
+    Prabhakar Shelke.
+    Reply Link
+    Pavan May 15, 2013, 6:24 am
+
+    Hi All,
+
+    I need to run the cronjob for every 15 days. the script should be executed on saturday and sunday at evening 8’o clock..
+
+    Please let me know
+    Reply Link
+    Pankaj June 4, 2013, 6:12 am
+
+    Hi…..
+    how to use special staring plz tell me any one.
+    Reply Link
+    Debrup Bhattacharjee July 18, 2013, 9:00 am
+
+    I want to run a cron job at 4 AM every morning to clear the /tmp folder on the server. How can I write this job?
+    Reply Link
+    Debrup Bhattacharjee July 18, 2013, 9:50 am
+
+    I want a add a cron job which would run at 3 AM every morning and delete all content in the /tmp folder. Can someone help me with that?
+    Reply Link
+    Erik August 10, 2013, 3:55 am
+
+    I was unable to run this command:
+
+    You also need to enable crond service via sys v / BSD init style system. Under RHEL / CentOS / Fedora, you need to use chkconfig (ntsysv) command to enable crond on boot:
+    # chekconfg crond on
+
+    I see you had a typo there, as well. I’m using Lubuntu and it sees no candidate for chkconfig
+    Reply Link
+    newbie August 23, 2013, 1:32 pm
+
+    I have to change my job scheduler from cron jobs to TWS, what I have to check in scripts, to ensure, there goes no wrong on shifting from cron to TWS.
+    Reply Link
+    babu October 3, 2013, 7:33 pm
+
+    I tried to configure crontab -e
+    for 23 14 10 3 8 /bin/echo hello
+    in the etc. I am unable to get the output. can anyone provide answer/solution.
+    Reply Link
+        pete January 29, 2014, 10:33 am
+
+        can’t use space try /bin/echo hello or use a little script
+        Reply Link
+    Asheesh Singh February 7, 2014, 3:39 pm
+
+    Hello,
+    How to scheduled a cron which run on at interval of 1 day 2 hour 30 minutes?
+
+    i used this */30 */2 */1 * *
+    Is it right?
+    Please help.
+    Reply Link
+    mahesh March 21, 2014, 4:53 am
+
+    Hi ..
+    Anyone can help me ..i want to recieve a mail if processes go down/ dumps/ if the CPU or memory usage exceeds configured threshold values. can i use cronjobs for this or any other alternatives are there ..please help me
+    Reply Link
+        Debrup March 21, 2014, 9:19 am
+
+        Hi,
+
+        I am not too sure about cron jobs, but there are number of Freeware tools out there (such as NagiOS), which you can configure to do the monitoring of the hosts and send out alert notifications based on required conditions.
+        Reply Link
+    Jaison April 22, 2014, 7:09 am
+
+    I wish to run this following command on my Linux prompt every hour:
+
+    /etc/init.d/symphoniad restart WebClient
+
+    I have a text file with this command and saved into the /etc/cron.hourly folder with name restartwebclient. Will this command get executed every hour? If yes, how do i verify it and if no, how do i get to execute this command line every one hour.
+
+    Kindly advise.
+    Jaison.
+    Reply Link
+        Nix Craft April 22, 2014, 7:12 am
+
+        Check crond log in your /var/log/ directory. On a CentOS/RHEL/Fedora Linux log file name – /var/log/cron.
+        Reply Link
+    cyprriot May 19, 2014, 10:26 am
+
+    Hi,
+
+    I have a vps system and I have working some job under webmin panel. I need to some script to check application while its stoped or not. if its stopeed script should be restart application again. and timely periond check.
+
+    thank you
+    Reply Link
+    Abhilasha June 10, 2014, 11:56 am
+
+    Hi,
+
+    I want to run a cronjob at 10:30 pm and 5:30 am everyday. Can you tell me how to go about it?
+
+    Thanks :).
+    Reply Link
+        sasi July 6, 2014, 2:35 pm
+
+        try this below expression
+        30 5, 22 * * * /path/to/script.sh
+        Reply Link
+    Nayelii August 9, 2014, 10:42 am
+
+    Just got bit by this myself. My oipinon is that it’s not suitable for production systems to automatically do this. At least put a question to the user if they want this turned on.My main database runs on an Areca hardware card that autoscrubs a 16 disk RAID-10 but doesn’t get in the way. I have several replicant slaves that have just a pair of 1TB 7200RPM SATA drives because they are read only and don’t need massive performance on IO. They work just fine. Until the first sunday of the month. I don’t care about bit rot, the data is all reproduceable from the master anytime I need it. I can monitor the drives with smart and replace them as needed easily and cheaply.However, a batch job that takes 6 hours ran for 12 hours last night and every customer I had was bitching about how slow the system was. In general there’s a lot of smart stuff done with mdadm. This is NOT one of them. Scott Marlowe
+    Reply Link
+    Tamirat August 20, 2014, 5:47 pm
+
+    Thanks a lot for sharing this resource by putting shell=/bin/bash …I solved error generated by crone job for not knowing some of the command I used in the bash script many thanks
+    Reply Link
+    Prashanta August 26, 2014, 3:13 pm
+
+    I hava a file media.sh which I intend to run daily. On running ./media.sh , an excel file test.xlsx is generated. I need to mail the test.xlsx file daily. How can I achieve this using cron ?
+    Reply Link
+    Theo September 22, 2014, 7:13 pm
+
+    Hi al. Most interesting. I have 3 inkjet printers with CISS. And I have Mepis Linux (KDE). As I’m going away for a month I would like to print a file called ‘test-page’ on each printer once a week to keep the print heads nice. Is it possible to start my computer with a script and perform this? (I would have to set wake up permissions in the BIOS I think) . What would the script look like . I am total newbie to bash and cron etc. Many thanks in advance for any help/script/instructions you email me.
+    Reply Link
+    avinash October 10, 2014, 2:45 pm
+
+    hello,
+    nice tutorial..very helpfull,
+    i have a question..
+    how to schedule a cronjob on 3rd saturday of every mount?
+    please help me on this..
+    thankyou
+    Reply Link
+    Nagoji November 19, 2014, 11:24 am
+
+    I want to run the cronjob for 2-3 days, can you please help me???
+    Reply Link
+        bum March 18, 2015, 12:02 pm
+
+        15 13 1/2 * * /path/to/script
+
+        This will run 13:15 (1:15pm) every 2 days starting the 1st every month.
+        Using 1/2 means:
+
+        1= first run, first day of the month
+        / = run every…
+        2 = days (and then where you put it, in my example, it’s every 2 days)
+        If i put it in hours it would be:
+
+        15 13/2 * * * /path/to/script
+
+        13 = hour to start
+        / = every
+        2 = hours
+        and it would run: 13:15, 15:15, 17:15, 19:15, 21:15, 23:15
+
+        you can also specify with commas and hyphens, eg:
+
+        15 13 2,4,6,8,11,14,16-18, 22 * * /path/to/script
+        This is only recommended if you want to run it irregularly, if you run the job regularly every X hours or X days, then use /X
+
+        This would run the job 13:15 every month at these days of the month: 2 4 6 8 11 14 16 17 18 22
+        Reply Link
+    adam January 22, 2015, 2:55 pm
+
+    i should automate several scripts and set a cron job all the scripts are to be done one after the otherand stop if there is any error andget an email is there a way to do that
+
+    thanks,
+    Reply Link
+    shufil February 20, 2015, 3:24 pm
+
+    Hi,
+
+    i created a bash scrip ,
+    if (( $(lsof -i:3007 | wc -l) > 0 ))
+    then
+    echo “$service is running!!!”
+    else
+    nohup node test_app.js &
+    fi
+
+    this file running with permission 765
+    And this scrip is working fine ,but its not working with cron jobs ,added crontab that is
+
+    * * * * * cd /home/samo/Board/App && ./test.sh
+
+    Please advice me , what is issue and how to resolve this
+
+    Shufil
+    Reply Link
+        bum March 18, 2015, 11:32 am
+
+        When running jobs in crontab you don’t have any paths, e.g. /bin:/usr/bin and so on, so the executable you’re trying to run, lsof and wc, and probably even echo doesn’t work. You either have to set the path or use full path in the script, eg.
+        if (( $(/usr/bin/lsof -i:3007 | /usr/bin/wc -l) > 0 ))
+
+        I’m not sure where those files are on your system, but that’s what you need to do. And personally, I would use /full/path/to/script and in the script if you need to enter a dir do cd /path/to/dir
+        Reply Link
+    reza August 3, 2015, 8:25 pm
+
+    so than,ks
+    that good idea.
+    i love bash scripting with your site
+    Reply Link
+    sebastien Boussard August 12, 2015, 3:28 am
+
+    How do i block my kids game during the day every day from like 10- 18 (6) (he is playing to much and it is junior year)
+    Reply Link
+    ramarasan.m August 20, 2015, 10:55 am
+
+    nice. post…
+
+    Good Work and keep it up
+
+    Thanks for your knowledge support !!!!
+    Reply Link
+
+Leave a Comment
+
+Name *
+
+Email *
+
+Comment
+
+
+   Tagged with: /etc/crontab, add cron job, adding cron job, cron job, cron job linux, cron jobs, cron jobs command, cronjob, linux cron job, setting cron job in linux, ubuntu cron job, Intermediate
+
+Next FAQ: How do I Compare two files under Linux or UNIX?
+
+Previous FAQ: FTP Connection refused error – Solution to problem
+
+Featured Articles:
+
+    30 Cool Open Source Software I Discovered in 2013
+    30 Handy Bash Shell Aliases For Linux / Unix / Mac OS X
+    Top 30 Nmap Command Examples For Sys/Network Admins
+    25 PHP Security Best Practices For Sys Admins
+    20 Linux System Monitoring Tools Every SysAdmin Should Know
+    20 Linux Server Hardening Security Tips
+    Linux: 20 Iptables Examples For New SysAdmins
+    Top 20 OpenSSH Server Best Security Practices
+    Top 20 Nginx WebServer Best Security Practices
+    20 Examples: Make Sure Unix / Linux Configuration Files Are Free From Syntax Errors
+    15 Greatest Open Source Terminal Applications Of 2012
+    My 10 UNIX Command Line Mistakes
+    Top 10 Open Source Web-Based Project Management Software
+    Top 5 Email Client For Linux, Mac OS X, and Windows Users
+    The Novice Guide To Buying A Linux Laptop
+
+Follow Us
+
+©2000-2015 nixCraft. All rights reserved. Privacy - Terms of Service - Questions or Comments
